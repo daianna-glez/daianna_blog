@@ -22,11 +22,13 @@ bibliography: references.bib
 
 One of my biggest questions while analyzing RNA-seq data has always been if I should first filter lowly-expressed genes and poor-quality samples and then normalize raw counts, or in what order these steps should be executed. Is there an order to follow irrespective of the filtering and normalization methods used? Does the order actually matter?
 
-As you can imagine, if I'm writting this post is because I haven't found a clear answer to all these questions. In my search I have gained more doubts than answers, but I have realized this is not an unaddressed issue but a hard one to close. With this post demonstrations I can finally say the order does matter, but it depends on the methodologies applied for filtering and normalizing.
+As you can imagine, if I'm writting this post is because I haven't found a clear answer to all these questions. In my search I have gained more doubts than answers, but I have realized this is not an unaddressed issue but rather a hard one to close. With this post's demonstrations I have finally concluded that the order does matter, but it depends on the methodologies applied for filtering and normalizing.
 
 In this post I will show the implications of the ordering of filtering and normalization steps, depending on the methods and metrics used for these analyses, with special attention to the TMM normalization method. I will offer warnings and practical recommendations for you to proceed with your analysis without racking you brain about it.
 
 # What you'll learn here
+
+TO DO
 
 # An example data set
 

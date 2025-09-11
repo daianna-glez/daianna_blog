@@ -1,22 +1,43 @@
-Define pval and how it controls for FPR
+---
+title: "Understanding False Discovery Rate and q-values"
+description: |
+  
+author:
+  - name: Daianna Gonzalez-Padilla
+date: 2024-07-16
+categories:
+  - "p-value"
+  - "FDR"
+  - "q-value"
+image: "images/"
+bibliography: references.bib
+---
 
-Define qval and how it controls for FDR
+⚠️ This page is under development.
 
-P val is V/m0 because its the prop of false positives under the Ho, i.e. among null tests! Not among true alternative tests.
+## Notes
 
-The pval not the qval is not the probability of being FP.
+-   Define pval and how it controls for FPR
 
-Comparison of pvals vs qvalues: less signif ones but less FPs when cutoff at qval
+-   Define qval and how it controls for FDR
 
-Explain how the the qvalue is computed from the pvalue and its interpretation from R code, is it equivalent to BH method?
+-   P val is V/m0 because its the prop of false positives under the Ho, i.e. among null tests! Not among true alternative tests.
 
-Sources:
+-   The pval not the qval is not the probability of being FP.
 
-Storey paper
+-   Comparison of pvals vs qvalues: less signif ones but less FPs when cutoff at qval
 
-qvalue documentation
+-   Explain how the the qvalue is computed from the pvalue and its interpretation from R code, is it equivalent to BH method?
 
-p.adjust BH methd, how are pvals adjusted? is it the same as qith qvalue?
+## Sources
+
+-   Storey paper
+
+-   qvalue documentation
+
+-   p.adjust BH methd, how are pvals adjusted? is it the same as qith qvalue?
+
+## Code
 
 Let's generate a list of p-values from the standard normal distribution
 

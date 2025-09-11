@@ -1,0 +1,35 @@
+Define pval and how it controls for FPR
+
+Define qval and how it controls for FDR
+
+P val is V/m0 because its the prop of false positives under the Ho, i.e. among null tests! Not among true alternative tests.
+
+The pval not the qval is not the probability of being FP.
+
+Comparison of pvals vs qvalues: less signif ones but less FPs when cutoff at qval
+
+Explain how the the qvalue is computed from the pvalue and its interpretation from R code, is it equivalent to BH method?
+
+Sources:
+
+Storey paper
+
+qvalue documentation
+
+p.adjust BH methd, how are pvals adjusted? is it the same as qith qvalue?
+
+Let's generate a list of p-values from the standard normal distribution
+
+```{r}
+# p <- pnorm(c(rnorm(20), rnorm(5, mean = 5)), lower.tail = F)
+# 
+# ## Number of tests
+# m <- length(p)
+# 
+# ## Index of test i (= number of tests declared significant i.e. with p<=pi)
+# i <- m:1
+# o <- order(p, decreasing = TRUE)
+# ro <- order(o)
+# 
+#  qvals <- pi0s$pi0 * pmin(1, cummin(p[o] * m /i ))[ro]
+```

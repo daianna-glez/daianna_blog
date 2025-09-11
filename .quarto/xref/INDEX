@@ -31,5 +31,11 @@
   },
   "posts/2024-01-20_Filtering_and_Normalization/index.qmd": {
     "index.html": "f6eb0482"
+  },
+  "posts/2025-08-10-pvals_uniform_distribution/index.qmd": {
+    "index.html": "38fb1e22"
+  },
+  "posts/2025-04-11-FDR_and_qvalue/index.qmd": {
+    "index.html": "03451c48"
   }
 }

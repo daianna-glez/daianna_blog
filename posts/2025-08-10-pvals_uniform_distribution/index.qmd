@@ -1,0 +1,486 @@
+---
+title: "Why are *p*-values uniformly distributed?"
+description: |
+  Graphical and mathematical demonstration of why *p*-values follow an uniform distribution.
+author:
+  - name: Daianna Gonzalez-Padilla
+date: 2024-07-16
+categories:
+  - "p-value"
+  - "uniform distribution"
+image: "images/"
+bibliography: references.bib
+---
+
+# Introduction
+
+If you've ever tested a null hypothesis across multiple tests and computed a *p*-value for each, you've almost certainly heard:
+
+> “Under the null hypothesis, *p*-values are uniformly distributed.”
+
+In the practice, this statement is not only accepted without dispute but is also very easy to graphically verify— simply plot the histogram of the *p*-values and assess the flatness of the distribution. Any deviation toward the left (*p*-values closer to 0) suggests some tests don't follow the null hypothesis. However, the reason why *p*-values are expected to be uniform is often a source of confusion as it isn't immediately apparent.
+
+The uniformity of *p*-values is a direct consequence of how they’re defined and of a theorem from probability theory called the *probability integral transform*. In this post, we’ll unpack exactly, both graphically and mathematically, how *p*-values spread evenly between 0 and 1.
+
+# What you'll learn here
+
+-   Understand how p-values are derived and how they relate to quantiles of a distribution.
+
+-   Graphically demonstrate how p-values build an uniform distribution, when taking the lower and upper tails.
+
+-   Mathematically demonstrate the uniformity of p-values according to xx theorem.
+
+# Defining the *p*-value
+
+A *p*-value is the probability of a continuous (or discrete) random variable $X$ acquiring a value “as or less (or more) extreme” as your observed value $x_{ob}$ according to the null’s reference distribution. Let's consider the random variable $X \sim N(0,1)$ and simulate the reference distribution by sampling 10,000 values from this normal distribution.
+
+```{r simulate_sample, warning=FALSE, message=FALSE, fig.align='center', fig.height=3.2, fig.width=4.8}
+library(ggplot2)
+library(latex2exp)
+
+## Generate sample from N(0,1) 
+set.seed(08112025)
+sample <- rnorm(10000, mean = 0, sd = 1)
+
+## Density plot for sample
+density <- dnorm(sample, mean = 0, sd = 1) 
+df <- data.frame(x = sample, y = density)
+
+ggplot(data = df, aes(x = x, ymin = 0, ymax = y)) +
+  geom_ribbon(fill = "gray95", linewidth = 0.4) +
+  theme_classic() +
+  labs(x = latex2exp::TeX("$X$"), 
+       y = "Density") +
+  geom_line(aes(y = y)) +
+  coord_cartesian(ylim = c(0, max(df$y)+0.02), expand = F) +
+  theme(plot.subtitle = element_text(size = 9, color = "gray30"), 
+        axis.text = element_text(size = 9),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10))
+
+```
+
+For a **left-tailed** test the *p*-value for $x_{ob}$ is given by $F_X(x_{ob}) = P(X \leq x_{ob})$, i.e., the cumulative distribution function (CDF) of $X$.
+
+```{r plot_pval_function, warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Show function for plotting p-value"
+#| 
+library(dplyr)
+
+plot_density_and_pval <- function(x_ob, tail){
+
+  if(tail == "left") {
+    
+    df$to_fill <- as.character(df$x <= x_ob)
+    pval <- signif(pnorm(x_ob, mean = 0, sd = 1, lower.tail = T), digits = 2)
+    fill_lab = expression(X <= x[ob])
+    p_lab_x_pos = min(df$x) + 1.2
+
+  } else if(tail == "right") {
+    
+    df$to_fill <- as.character(df$x > x_ob)
+    pval <- signif(pnorm(x_ob, mean = 0, sd = 1, lower.tail = F), digits = 2)
+    fill_lab = expression(X > x[ob])
+    p_lab_x_pos = -(min(df$x) + 1.2)
+
+  } else {
+
+    p_lab_x_pos = 0
+    
+    if(sum(df$x <= x_ob) < sum(df$x > x_ob)){
+      
+      x_right_tail <- quantile(df$x, 1-sum(df$x <= x_ob)/length(df$x))
+      df$to_fill <- as.character(df$x <= x_ob | df$x >= x_right_tail)
+      pval <- signif(2*pnorm(x_ob, mean = 0, sd = 1, lower.tail = T), digits = 2)
+      fill_lab = expression(X <= x[ob] ~ "|" ~ X >= -x[ob])
+
+    } else {
+      
+      x_left_tail <- quantile(df$x, sum(df$x > x_ob)/length(df$x))
+      df$to_fill <- as.character(df$x > x_ob | df$x <= x_left_tail)
+      pval <- signif(2*pnorm(x_ob, mean = 0, sd = 1, lower.tail = F), digits = 2)
+      fill_lab = expression(X > x[ob] ~ "|" ~ X < -x[ob])
+    }
+  }
+
+  df$to_fill <- factor(df$to_fill, levels = c("TRUE", "FALSE"))
+  p <- ggplot(data = df, aes(x = x, ymin = 0, ymax = y,
+                      fill = to_fill)) +
+  geom_ribbon(linewidth = 0.4, color = "black") +
+  scale_fill_manual(values = c("TRUE" = "orangered1", "FALSE" = "gray95")) +
+  geom_segment(aes(x = x_ob, xend = x_ob, 
+                   y = 0, yend = df[df$x == x_ob, "y"]),
+               linewidth = 0.25, show.legend = F) +
+  geom_text(aes(x = p_lab_x_pos, y = df[df$x == x_ob, "y"]/2), 
+            inherit.aes = T, 
+            label = paste0("italic(p) == ", pval),
+            fontface = "plain", lineheight = 0.8,
+            size = 2.5, show.legend = F, parse = TRUE) +
+  theme_classic() +
+  labs(x = "X", y = "Density",
+       fill = fill_lab) +
+  coord_cartesian(ylim = c(0, max(df$y)), expand = F) +
+  theme(axis.text = element_text(size = 9),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 10),
+        legend.key.height = unit(0.5, "cm"),
+        legend.key.width = unit(0.5, "cm"))
+  
+  if(tail == "both"){
+    if(sum(df$x <= x_ob) < sum(df$x > x_ob)){
+      tail_line <- x_right_tail
+    } else{
+      tail_line <- x_left_tail
+    }
+    p = p + geom_segment(aes(x = tail_line, xend = tail_line, 
+                               y = 0, yend = dnorm(tail_line, mean = 0, sd = 1)),
+                          linewidth = 0.25, show.legend = F) 
+
+  }
+  p
+}
+```
+
+```{r left_tailed_pval, fig.align='center', warning=FALSE, message=FALSE, fig.height=3.2, fig.width=5.6}
+plot_density_and_pval(x_ob = df$x[2], tail = "left")
+```
+
+For a **right-tailed** test the *p*-value for $x_{ob}$ is given by $F_X(x_{ob}) = P(X >x_{ob}) = 1 - P(X \leq x_{ob})$.
+
+```{r right_tailed_pval, fig.align='center', warning=FALSE, message=FALSE, fig.height=3.2, fig.width=5.6}
+plot_density_and_pval(x_ob = df$x[2], tail = "right")
+```
+
+For a **two-tailed** test the *p*-value for $x_{ob}$ is the double of the smaller tail probability, i.e., $F_X(x_{ob}) = 2 \times P(X \leq x_{ob})$, or alternatively, $2 \times P(X >x_{ob})$.
+
+```{r two_tailed_pval, fig.align='center', warning=FALSE, message=FALSE, fig.height=3.2, fig.width=5.6}
+plot_density_and_pval(x_ob = df$x[2], tail = "both")
+```
+
+# The flatness of the *p*-value histogram
+
+## Left-tailed *p*-values
+
+To understand why *p*-values are uniformly distributed, let's start by taking all observations of $X$ that are below the 1st decile, i.e., the bottom 10% of the data. While deciles are used here for ease of illustration, the concepts extend naturally to any chosen percentage of the data.
+
+For this purpose, below we build a function to annotate each observed value of $X$ with the decile interval it falls into, a second function to plot the density of $X$ highlighting consecutive intervals each containing 10% of the data, and a third function we'll use later to plot the histogram of *p*-values for data points in selected decile intervals.
+
+```{r functions, warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Show functions"
+
+library(dplyr)
+
+## Function to annotate decile range of each data point
+annotate_decile_range <- function(decile){
+    
+  q = decile
+  decile_range <- if_else(df$x <= quantile(df$x, q), paste("leq", q), paste("g", q))
+  
+  while(q > 0.1){
+    ## If each observation is between decile q-1 and q
+    decile_range[which(df$x > quantile(df$x, q-0.1) & 
+                         df$x <= quantile(df$x, q))] <- paste("g", q-0.1, ", leq", q)
+    q = q - 0.1
+  }
+  decile_range[which(df$x <= quantile(df$x, 0.1))] <- "leq 0.1"
+  
+  df$decile_range <- decile_range
+  
+  return(df)
+}
+  
+
+## Function to plot decile intervals in X density up to q decile
+plot_density_decile <- function(decile){
+  
+  df <- annotate_decile_range(decile)
+  
+  ## Colors and alphas for decile ranges
+  range_colors = c(colorRampPalette(c("honeydew1", "azure2", "thistle2","plum",
+                                    "sienna2"))(10), "gray90")
+  range_alphas = c(rep(1, 10), 0.2)
+  names(range_colors) <- names(range_alphas) <- c("leq 0.1", 
+                                   paste("g", seq(from = 0.1, to = 0.9, by = 0.1), ",", "leq", 
+                                         seq(from = 0.1, to = 0.9, by = 0.1) + 0.1), 
+                                   paste("g", decile))
+  
+  vlines <- vector()
+  for(q in seq(from = 0.1, to = decile, by = 0.1)){
+    
+    ## For vertical lines in each decile 
+    x = quantile(df$x, q)
+    xend = quantile(df$x, q)
+    y = 0
+    yend = df[which.min(abs(df$x - x)), "y"]
+    
+    ## For annotating "10%" above each decile range
+    prior_x = quantile(df$x, q-0.1)
+    prior_yend = df[which.min(abs(df$x - prior_x)), "y"]
+    middle_x = prior_x + (x - prior_x)/2
+    middle_y = prior_yend + (yend - prior_yend)/2
+   
+    if(q == 0.1){
+      lab_x_pos = middle_x
+      lab_y_pos = middle_y - 0.04
+    }
+    else if(q == 1){
+      lab_x_pos = middle_x
+      lab_y_pos = middle_y - 0.03
+    }
+    else if(q == 0.5){
+      lab_x_pos = middle_x - 0.05
+      lab_y_pos = middle_y + 0.014
+    }
+    else if(q == 0.6){
+      lab_x_pos = middle_x + 0.12
+      lab_y_pos = middle_y + 0.014
+    }
+    else{
+      lab_x_pos = middle_x + (sign(x)*0.17)
+      diff_y = abs((yend - prior_yend)/2)
+      lab_y_pos = middle_y + (diff_y*0.33)
+    }
+    
+    vlines <- rbind(vlines, c(q, x, xend, y, yend, lab_x_pos, lab_y_pos))
+  }
+    
+  vlines <- as.data.frame(vlines)
+  colnames(vlines) <- c("decile", "x", "xend", "y", "yend", "lab_x_pos", "lab_y_pos")
+  
+  
+  ggplot(data = df, aes(x = x, ymin = 0, ymax = y, 
+                        fill = decile_range,
+                        alpha = decile_range)) +
+  geom_ribbon(color = "black", linewidth = 0.35) +
+  theme_classic() +
+  scale_fill_manual(values = range_colors) +
+  scale_alpha_manual(values = range_alphas) +
+  labs(x = latex2exp::TeX("$X$"), 
+       y = "Density") +
+  geom_segment(data = vlines, inherit.aes = F,
+               aes(x = x + 0.005, 
+                   xend = xend + 0.005,
+                   y = y, yend = yend), 
+               linewidth = 0.35, show.legend = F) +
+  geom_text(data = vlines, inherit.aes = F,
+                aes(x = lab_x_pos, y = lab_y_pos), label ="10%", 
+            size = 2.4, show.legend = F) +
+  guides(fill = "none", alpha = "none") +
+  coord_cartesian(ylim = c(0, max(df$y)+0.02), expand = F) +
+  theme(axis.text = element_text(size = 9),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size =8),
+        legend.key.height = unit(0.5, "cm"), 
+        legend.key.width = unit(0.5, "cm"),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10))
+}
+
+
+## Function to plot pval histogram up to decile q
+plot_pval_hist <- function(decile, tail){
+  
+  if(tail == "left"){
+    tail_pvals <- "left_tailed_pval"
+  } else if(tail == "right"){
+    tail_pvals <- "right_tailed_pval"
+  } else{
+    tail_pvals <- "two_tailed_pval"
+  }
+  
+  
+  ## Colors and alphas for decile ranges
+  range_colors = colorRampPalette(c("honeydew1", "azure2","thistle2","plum",
+                                    "sienna2"))(10)
+  names(range_colors) <- c("leq 0.1", 
+                                   paste("g", seq(from = 0.1, to = 0.9, by = 0.1), ",", "leq", 
+                                              seq(from = 0.1, to = 0.9, by = 0.1) + 0.1))
+
+  decile_ranges_labs <- c("bottom 10%", "between 10-20%", "between 20-30%", "between 30-40%",
+                          "between 40-50%", "between 50-60%", "between 60-70%",
+                          "between 70-80%","between 80-90%", "top 10%")
+  names(decile_ranges_labs) <- names(range_colors)
+
+  df <- annotate_decile_range(decile)
+  decile_ranges <- setdiff(unique(df$decile_range), paste("g", decile))
+
+  data = subset(df, decile_range %in% decile_ranges)
+  data$decile_range <- factor(data$decile_range, levels = names(decile_ranges_labs))
+  
+  if(tail == "both"){
+    data$decile_range <- factor(data$decile_range, levels = rev(names(decile_ranges_labs)))
+  }
+
+  ggplot(data, aes(x = get(tail_pvals), fill = decile_range)) +
+  geom_histogram(color="black", bins = 10, binwidth = 0.3, linewidth = 0.4,
+                 breaks = seq(from = 0, to = 1, by = 0.1))  +
+  theme_classic() +
+  scale_fill_manual(values = range_colors, labels = decile_ranges_labs[decile_ranges]) +
+  coord_cartesian(xlim = c(-0.02, 1.02), ylim = c(0, 1050), expand = F) +
+  scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.1),
+                     labels = seq(from = 0, to = 1, by = 0.1)) +
+    labs(x = "p-value", y = "Count", fill = "Decile range") +
+    theme(axis.text = element_text(size = 9),
+          legend.text = element_text(size = 7),
+          legend.title = element_text(size =8),
+          legend.key.height = unit(0.5, "cm"),
+          legend.key.width = unit(0.5, "cm"),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10))
+
+}
+```
+
+```{r plot_bottom_10, warning=FALSE, message=FALSE, fig.align='center', fig.height=3.7, fig.width=5.2}
+plot_density_decile(0.1)
+```
+
+We note the probability of $X$ being smaller or equal to each of the data points within this bottom 10% does not exceed 10%. Revisiting the definition of the left-tailed *p*-value for any observed $x$, $p(x) = F_X(x) = P(X \leq x)$, this means *p*-values for this lowest decile interval are ≤ 0.1. Let's examine this by computing the left-tailed *p*-value for all observations and displaying the histogram for those below the 1st decile.
+
+```{r hists_01, fig.width = 5, fig.height = 4, fig.align='center', warning=FALSE, message=FALSE}
+
+## Left-tailed p-vals
+df$left_tailed_pval <- sapply(df$x, function(x){table(df$x <= x)["TRUE"]/10000})
+
+## Hist of pvals for bottom 10% data points
+plot_pval_hist(0.1, "left")
+```
+
+Next, let us consider the subsequent 10% of the data—namely, the observations between the first and second deciles—and examine their associated *p*-values.
+
+```{r plots_02, fig.width = 10.2, fig.height = 3.7, fig.align='center', warning=FALSE, message=FALSE}
+library(cowplot)
+
+p1 <- plot_density_decile(0.2)
+p2 <- plot_pval_hist(0.2, "left")
+
+plot_grid(p1, p2, align = "h")
+```
+
+Because every time we take the same percentage of the data lying between the $q ∈ \{1,2,3, ..., 10\}$th and $q-1$th deciles with *p*-values contained between $\frac{q-1}{10}$ and $\frac{q}{10}$, bars have equal height in the histogram.
+
+See it now, isn't? If not, let’s try adding more data— 30%, 40%, 50% … up to the full dataset.
+
+```{r plots_03_to_10, fig.width = 12, fig.height = 11, fig.align='center', warning=FALSE, message=FALSE}
+
+plot_grid(plot_density_decile(0.3), plot_pval_hist(0.3, "left"), 
+          plot_density_decile(0.4), plot_pval_hist(0.4, "left"), 
+          plot_density_decile(1), plot_pval_hist(1, "left"), align = "vh", ncol = 2, rel_widths = c(1, 0.8))
+```
+
+### Mathematical demonstration
+
+These graphical observations can be formally demonstrated. The *probability integral transform* theorem states that for $X$, a continuous random variable, the random variable for its cumulative distribution function $Y = F_X(x) = P(X \leq x)$, which returns its *p*-values, has a uniform distribution on the interval $[0,1]$.
+
+[Proof]{.underline}: consider the cumulative distribution function of $Y$, $F_Y(y) = P(Y \leq y)$. The key here is to note that the probability of getting *p*-values below or equal to $y$ is equivalent to the probability of getting $X$ values below or equal to corresponding quantile for $y$ (see example below).
+
+```{r demo_left}
+
+## Pr(Y ≤ 0.456)
+pr_Y = sum(df$left_tailed_pval <= 0.456) / length(df$left_tailed_pval) 
+## Pr(X ≤ quantile for 0.456)
+pr_X = sum(df$x <= quantile(df$x, 0.456)) / length(df$x) 
+pr_Y == pr_X
+```
+
+Therefore, $P(Y \leq y) = P(X \leq F^{-1}_X(y))$, which, by definition, is exactly $y$. Thus, $F_Y(y)=P(Y \leq y) = y$ and $Y$ is uniformly distributed.
+
+## Right-tailed *p*-values
+
+For right-tailed *p*-values the pattern is mirrored: the bottom 10% of the data points have *p*-values between 0.9 to 1, the second top 10% between 0.8 and 0.9, and so on ...
+
+```{r hists_right_all, fig.width = 5, fig.height = 4, fig.align='center', warning=FALSE, message=FALSE}
+
+## Right-tailed p-vals
+df$right_tailed_pval <- sapply(df$x, function(x){table(df$x > x)["TRUE"]/10000})
+df$right_tailed_pval <- replace(df$right_tailed_pval, which(is.na(df$right_tailed_pval)), 0)
+
+plot_pval_hist(0.1, "right")
+
+```
+
+### Mathematical demonstration
+
+[Proof]{.underline}: we define $Y_c = P(X > x) = 1 - Y$, with $Y = P(X \leq x)$. Its CDF is given by $P(Y_c\leq y) = 1 - P(Y_c > y)$. The key here is to note that the those right-handed *p*-values greater than $y$ correspond to the bottom $1-y$ proportion of the data so that $P(Y_c > y) = P(X \leq F^{-1}_X(1-y))$, which by definition, equals $1-y$ (see example below). Therefore $P(Y_c >y) = 1-y$ and $P(Y_c\leq y) = 1 - (1 - y) = y$, and both, $Y$ and its complement $Y_c$, follow an uniform distribution.
+
+```{r demo_right, fig.width = 10.2, fig.height = 3.7, fig.align='center', warning=FALSE, message=FALSE}
+
+## Pr(X ≤ quantile for 1 - 0.7)
+p1 <- plot_density_decile(0.3)
+## Pr(Yc > 0.7)
+p2 <- plot_pval_hist(0.3, "right")
+
+plot_grid(p2, p1, align = "h")
+```
+
+## Two-tailed *p*-values
+
+For data points within intervals of deciles $q ∈ \{1,2,3,4,5\}$, their two-tailed *p*-values lie between $\frac{q-1}{10}\times 2$ and $\frac{q}{10}\times 2$, whereas for those above the 5th decile, *p*-values lie between $(1-\frac{q-1}{10})\times 2$ and $(1-\frac{q}{10})\times 2$.
+
+```{r hists_two_all, fig.width = 5, fig.height = 13, fig.align='center', warning=FALSE, message=FALSE}
+
+## Right-tailed p-vals
+df$two_tailed_pval <- apply(df, 1, function(x){2*as.double(min(x["left_tailed_pval"], x["right_tailed_pval"]))})
+
+## Hist of pvals for bottom 10% data points
+p1 <- plot_pval_hist(0.1, "both") +  guides(fill = guide_legend(reverse = TRUE))
+p2 <- plot_pval_hist(0.2, "both") +  guides(fill = guide_legend(reverse = TRUE))
+p3 <- plot_pval_hist(0.6, "both") +  guides(fill = guide_legend(reverse = TRUE))
+p4 <- plot_pval_hist(1, "both") +  guides(fill = guide_legend(reverse = TRUE))
+
+plot_grid(p1, p2, p3, p4, align = "h", ncol = 1)
+
+```
+
+### Mathematical demonstration
+
+[Proof]{.underline}: let $Y_l$ and $Y_r$ be the random variables for two-tailed *p*-values for observations of $X$ below and above the 5th decile, respectively (bottom and top half of previous histogram, respectively). Let $Y_t$ be the random variable for two-tailed *p*-values across all observations (the complete histogram). The CDF of $Y_t$ is $P(Y_t \leq y) = \frac{P(Y_l \leq y)}{2} + \frac{P(Y_r \leq y)}{2} = P(Y \leq \frac{y}{2}) + P(Y_c \leq \frac{y}{2})$. Because $Y$ and $Y_c$ are uniformly distributed, the latter equals to $\frac{y}{2} + \frac{y}{2}$ so $P(Y_t \leq y) = y$ and is thus also uniformly distributed.
+
+-   Relate to theorem and CDF and PDF: <https://matthewfeickert.github.io/Statistics-Notes/notebooks/Introductory/probability-integral-transform.html>
+
+Ideas:
+
+### **When p-values *are* uniformly distributed**
+
+-   **Under the null hypothesis** is *true*
+
+-   **The test statistic’s reference distribution is correct** (e.g., you’re actually using the right t-distribution, χ² distribution, etc.)
+
+-   **No p-hacking** or data snooping has been done
+
+-   **Continuous** test statistic (ties complicate things)
+
+In that ideal case,
+
+P(p≤α)=α
+
+for all α∈\[0,1\]α∈\[0,1\],\
+meaning the p-value follows a Uniform(0,1) distribution.
+
+------------------------------------------------------------------------
+
+### **When they are *not* uniformly distributed**
+
+-   **Null hypothesis is false** → p-values are *stochastically smaller* (skewed toward 0)
+
+-   **Model assumptions are violated** (wrong reference distribution, heteroscedasticity, etc.) → distribution can be distorted in unpredictable ways
+
+-   **Discrete test statistics** (e.g., Fisher’s exact test) → distribution is “stepped” and not perfectly uniform
+
+-   **Multiple testing without correction** → aggregated p-values no longer follow a simple uniform distribution
+
+-   **Selection bias / p-hacking** → distribution can become heavily biased toward small values
+
+------------------------------------------------------------------------
+
+✅ **Bottom line:**\
+P-values are *theoretically* Uniform(0,1) **only under the null and correct modeling assumptions**.\
+The reference distribution does matter — if it’s wrong, the uniformity breaks.
+
+# Conclusion
+
+The cases where the p-values ar enot uniformly distributed have been discussed in. This is the formal basis of p-values being uniform: by definition they are CDF evaluations of observed statistics.

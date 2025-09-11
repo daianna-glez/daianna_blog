@@ -54,6 +54,9 @@ Then, think of the following three cases:
 Below, we create a matrix of raw read counts from a negative binomial distribution centered in 50, for all 30 genes across the 15 samples. Then, we introduce the 3 highly-expressed genes (counts from 1,000 to 2,000) in condition [**A**]{style="color: #EE7AE9"} only.
 
 ```{r plot_raw_expr_case1, fig.height = 5, fig.align='center', warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Show code"
+
 
 library(ComplexHeatmap)
 library(circlize)
@@ -112,6 +115,8 @@ Heatmap(expr_case1,
     ![](images/Case2.png){width="4800"}
 
     ```{r plot_raw_expr_case2, fig.height = 5, fig.align='center', warning=FALSE, message=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show code"
 
     ################################################################
     ##                           Case 2:
@@ -160,6 +165,8 @@ Heatmap(expr_case1,
     ![](images/Case3.png)
 
     ```{r plot_raw_expr_case3, fig.height = 5, fig.align='center', warning=FALSE, message=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show code"
 
     ################################################################
     ##                           Case 3:
@@ -210,6 +217,9 @@ Heatmap(expr_case1,
 Something perhaps evident but worth showing is that the sizes of the "true" total libraries we just generated, vary considerably between samples in these three hypothetical but not unlikely scenarios. In all cases, samples in condition [**A**]{style="color: #EE7AE9"} have greater library sizes because of highly-expressed genes in [**Case 1**]{.underline}, more expressed genes in [**Case 2**]{.underline}, or both in [**Case 3**]{.underline}, as presented in the below bar plots.
 
 ```{r plot_lib_sizes, fig.width=6.3, fig.height=4.3, fig.align='center', warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Show code"
+
 library(ggplot2)
 
 ## Sample library sizes and conditions
@@ -263,9 +273,12 @@ The sampling of molecules introduces a proportionality problem in the RNA-seq co
 
 This is known as the [**RNA composition or population bias**]{style="background-color: #FFF68F"}: the molecule sampling in sequencing experiments [artificially reduce]{.underline} the expression of [under-sampled genes]{.underline} in samples with [larger RNA content]{.underline}. Analogously, this can also lead to apparent increments in gene expression in samples with lowly-expressed genes (case not shown here). This implies RNA-seq count data sets need to be processed to make accurate inferences from them.
 
-In the next code we simulate this read sampling by randomly selecting 650 reads per sample in each case and we plot the proportion of selected reads that correspond to each gene. Note that by selecting the same number of reads in all samples, library size is held constant and no differences in read counts are due to sequencing depth.
+In the next toggle code we simulate this read sampling by randomly selecting 650 reads per sample in each case and we plot the proportion of selected reads that correspond to each gene. Note that by selecting the same number of reads in all samples, library size is held constant and no differences in read counts are due to sequencing depth.
 
 ```{r plot_gene_props, fig.align='center', warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Show code"
+
 library(rlang)
 library(reshape2)
 library(Polychrome)
@@ -345,6 +358,8 @@ for(case in 1:3){
 In the following heat maps we plot the count matrices after sampling.
 
 ```{r plot_RNAseq_expr, fig.height = 5, fig.align='center', warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Show code"
 
 ## Plot heat map of RNA-seq counts in each case
 for(case in 1:3){
@@ -386,7 +401,10 @@ By design, we know that in all three cases most genes are not differentially exp
 
 Below we are plotting the *t*-statistics per gene for each comparison and in each case. These statistics capture the sign and size of the difference in gene expression between conditions. The expression changes that were significant (*p*-value \<0.05) have a "\*" above the bar.
 
-```{r t_test_counts, fig.width=6.5, fig.height=4, fig.align='center', warning=FALSE, message=FALSE}
+```{r t_test_function}
+#| code-fold: true
+#| code-summary: "Show code"
+
 ## t-test per gene based on counts before and after sampling 
 t_test_expr <- function(expr_counts){
   
@@ -470,9 +488,10 @@ t_test_expr <- function(expr_counts){
 
 }
 
+```
 
+```{r t_test_counts, fig.width=6.5, fig.height=4, fig.align='center', warning=FALSE, message=FALSE}
 t_test_expr(expr_counts = "expr")
-
 ```
 
 Not surprisingly, highly-expressed and unique genes in condition [**A**]{style="color: #EE7AE9"} have significantly higher expression when compared to the other two conditions, and except for a few false positives, the rest of genes don't present significant expression changes.
@@ -520,9 +539,11 @@ What Mark D. Robinson and Alicia Oshlack proposed with their [**Trimmed Mean of 
     A_g = \frac{log_2(\frac{y_{gk}}{N_k}) + log_2(\frac{y_{gr}}{N_r})}{2}
     $$ where $y_{gk}$ and $y_{gr}$ are the RNA-seq counts of gene $g$ in samples $k$ and $r$, respectively.
 
-    In the next code we compute the $M$ and $A$ values for all genes in each case, comparing sample 1 of condition [**A**]{style="color: #EE7AE9"} vs sample 5 of condition [**B**]{style="color: #7CCD7C"}. We then plot $M$ vs $A$ values to spot up and down differentially expressed genes.
+    Below we compute the $M$ and $A$ values for all genes in each case, comparing sample 1 of condition [**A**]{style="color: #EE7AE9"} vs sample 5 of condition [**B**]{style="color: #7CCD7C"}. We then plot $M$ vs $A$ values to spot up and down differentially expressed genes.
 
     ```{r MA_plots, fig.height = 3, fig.width = 4.55, fig.align='center', warning=FALSE, message=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show code"
 
     ## MA plots
     for(case in 1:3){
@@ -591,6 +612,8 @@ What Mark D. Robinson and Alicia Oshlack proposed with their [**Trimmed Mean of 
     Given the very few genes we have in our simulated data, in total we'll trim 20% of $M$ values (10% up and 10% low) and 10% of $A$ values (5% up and 5% low).
 
     ```{r trimming_boxplots, fig.height = 3.6, fig.width = 10, fig.align='center', warning=FALSE, message=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show code"
 
     library(cowplot)
 
@@ -652,11 +675,6 @@ What Mark D. Robinson and Alicia Oshlack proposed with their [**Trimmed Mean of 
                       ncol = 4, rel_widths = c(1,1,1,0.6)))
 
     }
-
-    ## Subset to non-trimmed genes
-    df_trimmed_case_1 <- df_case_1[!df_case_1$trimM & !df_case_1$trimA, ]
-    df_trimmed_case_2 <- df_case_2[!df_case_2$trimM & !df_case_2$trimA, ]
-    df_trimmed_case_3 <- df_case_3[!df_case_3$trimM & !df_case_3$trimA, ]
     ```
 
 3.  Estimate the average of the $M$ values for not trimmed genes ($G^*$), each weighted by gene inverse variances ($w_{gk}^r$) to account for smaller variances in logFCs of genes with larger read counts.
@@ -671,11 +689,18 @@ What Mark D. Robinson and Alicia Oshlack proposed with their [**Trimmed Mean of 
 
     $TMM$ is the global fold change in expression of sample $k$ compared to sample $r$ after sampling reads.
 
-    In the next code we manually find this factor and compare it with the one returned by `edgeR::calcNormFactors()` and with the true known value of $\frac{S_r}{S_k}$.
+    In the next toggle code we manually find this factor and compare it with the one returned by `edgeR::calcNormFactors()` and with the true known value of $\frac{S_r}{S_k}$.
 
     ```{r compute_factors, fig.height = 3.6, fig.width = 10, fig.align='center', warning=FALSE, message=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show code"
 
     library(edgeR)
+
+    ## Subset to non-trimmed genes
+    df_trimmed_case_1 <- df_case_1[!df_case_1$trimM & !df_case_1$trimA, ]
+    df_trimmed_case_2 <- df_case_2[!df_case_2$trimM & !df_case_2$trimA, ]
+    df_trimmed_case_3 <- df_case_3[!df_case_3$trimM & !df_case_3$trimA, ]
 
     ## Compute scaling factors 
     for(case in 1:3){
@@ -720,7 +745,6 @@ What Mark D. Robinson and Alicia Oshlack proposed with their [**Trimmed Mean of 
                 signif(sqrt(ratio_true), digits = 5), 
                 signif(1/sqrt(ratio_true), digits = 5)))
         cat("\n")
-     
     }
 
     ```
@@ -730,6 +754,8 @@ What Mark D. Robinson and Alicia Oshlack proposed with their [**Trimmed Mean of 
 4.  These factors are then used to scale the original RNA-seq sample library sizes and normalize counts. Look in the following plots the more homogeneous expression of true non-DEGs in samples 1 and 5 after normalizing counts by **effective (scaled) library sizes**, recapitulating the true expression patterns shown in the very first heat maps.
 
     ```{r plot_norm_expr, fig.height = 4, fig.width = 6, fig.align='center', warning=FALSE, message=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show code"
 
     hs <- list()
 
@@ -816,10 +842,10 @@ The key take-home message for you is that if DGE analysis results in globally-sh
 :::
 
 ::: {style="background-color: #F8F8FF;  padding: 14px; margin-left: 0px; margin-bottom: 1px; font-size: 15px; line-height: 1.3; margin-bottom:15px"}
-| ![](images/clipboard-439834626.png){width="22"}  **Source code for TMM implementation in `edgeR::calcNormFactors()`:** <https://rdrr.io/bioc/edgeR/src/R/calcNormFactors.R>
+| ![](images/clipboard-439834626.png){width="22"} **Source code for TMM implementation in `edgeR::calcNormFactors()`:** <https://rdrr.io/bioc/edgeR/src/R/calcNormFactors.R>
 :::
 
 ::: {style="background-color: #F8F8FF;  padding: 14px; margin-left: 0px; margin-bottom: 1px; font-size: 15px; line-height: 1.3; margin-bottom:15px"}
-| ![](https://em-content.zobj.net/content/2020/04/05/yt.png){width="17"}   **Video explaining TMM steps:**
+| ![](https://em-content.zobj.net/content/2020/04/05/yt.png){width="17"} **Video explaining TMM steps:**
 | Starmer, J. (2018). StatQuest: edgeR, part 1, Library Normalization\[Video\]. YouTube: <https://www.youtube.com/watch?v=Wdt6jdi-NQo>
 :::

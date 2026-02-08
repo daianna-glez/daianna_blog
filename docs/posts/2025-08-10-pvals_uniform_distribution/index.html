@@ -241,6 +241,8 @@ window.Quarto = {
 <h1 class="title">Why are <em>p</em>-values uniformly distributed?</h1>
   <div class="quarto-categories">
     <div class="quarto-category">p-value</div>
+    <div class="quarto-category">test statistic</div>
+    <div class="quarto-category">cumulative distribution function</div>
     <div class="quarto-category">uniform distribution</div>
     <div class="quarto-category">probability integral transform</div>
   </div>
@@ -298,8 +300,8 @@ window.Quarto = {
 <section id="defining-the-p-value" class="level1">
 <h1>Defining the <em>p</em>-value</h1>
 <p>Let us begin by defining a test statistic. When you conduct a hypothesis test on a sample or dataset, you compute a quantity that measures the <em>effect</em> you are interested in (e.g.&nbsp;the difference in sample means across conditions). This effect estimate is often accompanied by a measure of <em>uncertainty</em> that depends on sample size and variability. In many statistical tests, the effect and its uncertainty are combined into what is known as a <span style="color:#EE7942"><strong>test statistic</strong></span>, but its specific construction depends on the properties of the data and the research question.</p>
-<p>What is key about test statistics is that we know (or can approximate) their sampling distribution under the <span style="background-color:#E6F6FB">null hypothesis</span> (e.g.&nbsp;when the effect is nonexistent). This allow us to compare our observed test statistic <span class="math inline">\(t_{ob}\)</span> against the null distribution and assess how likely such a value would be if the null hypothesis were true. If you followed this reasoning, you’ve essentially grasped what a <em>p</em>-value is.</p>
-<p>The <span style="color:#EE0000"><strong><em>p</em>-value</strong></span> is the probability that, if you were to draw at random from such null distribution of test statistics, you would get one that is equal or more extreme (smaller or greater) than your observed test statistic <span class="math inline">\(t_{ob}\)</span>.</p>
+<p>What is key about test statistics is that we know (or can approximate) their sampling distribution under the <em>null hypothesis</em> (e.g.&nbsp;when the effect is nonexistent). This allow us to compare our observed test statistic <span class="math inline">\(t_{ob}\)</span> against the null distribution and assess how likely such a value would be if the null hypothesis were true. If you followed this reasoning, you’ve essentially grasped what a <em>p</em>-value is.</p>
+<p>The <span style="color:#EE0000"><strong><em>p</em>-value</strong></span> is the probability that, if you were to draw at random from such null distribution of test statistics, you would get one that is equal or more extreme (smaller or greater) than your observed test statistic <span style="background-color:#F0FBC5"><span class="math inline">\(t_{ob}\)</span></span>.</p>
 <p>To visualize what a <em>p</em>-value represents, let’s simulate a null distribution of test statistics by randomly sampling 10,000 times from a standard normal distribution. Let <span class="math inline">\(T\)</span> denote the test statistic, a random variable induced by the data, whose distribution under the null hypothesis we are simulating.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
@@ -392,27 +394,37 @@ window.Quarto = {
 <span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"T"</span>, <span class="at">y =</span> <span class="st">"Density"</span>,</span>
 <span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> fill_lab) <span class="sc">+</span></span>
 <span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(df<span class="sc">$</span>y)), <span class="at">expand =</span> F) <span class="sc">+</span></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>),</span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">7</span>),</span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key.height =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>),</span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key.width =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>))</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(tail <span class="sc">==</span> <span class="st">"both"</span>){</span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">sum</span>(df<span class="sc">$</span>t <span class="sc">&lt;=</span> t_ob) <span class="sc">&lt;</span> <span class="fu">sum</span>(df<span class="sc">$</span>t <span class="sc">&gt;</span> t_ob)){</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>      tail_line <span class="ot">&lt;-</span> t_right_tail</span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>      tail_line <span class="ot">&lt;-</span> t_left_tail</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">=</span> p <span class="sc">+</span> <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> tail_line, <span class="at">xend =</span> tail_line, </span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>                               <span class="at">y =</span> <span class="dv">0</span>, <span class="at">yend =</span> <span class="fu">dnorm</span>(tail_line, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)),</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>                          <span class="at">linewidth =</span> <span class="fl">0.25</span>, <span class="at">show.legend =</span> F) </span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>  p</span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"rect"</span>, <span class="at">xmin =</span> t_ob <span class="sc">-</span> <span class="fl">0.25</span>, <span class="at">xmax =</span> t_ob <span class="sc">+</span> <span class="fl">0.25</span>,</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>           <span class="at">ymin =</span> <span class="fl">0.022</span> <span class="sc">-</span> <span class="fl">0.015</span>, <span class="at">ymax =</span> <span class="fl">0.022</span> <span class="sc">+</span> <span class="fl">0.015</span>,</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> <span class="st">"#F0FBC5"</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> t_ob, <span class="at">y =</span> <span class="fl">0.022</span>, <span class="at">label =</span>  <span class="fu">expression</span>(t[ob])), </span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>                 <span class="at">parse =</span> T, <span class="at">size =</span> <span class="fl">3.3</span>, <span class="at">show.legend =</span> F) <span class="sc">+</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>),</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">7</span>),</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key.height =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>),</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key.width =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>))</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(tail <span class="sc">==</span> <span class="st">"both"</span>){</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">sum</span>(df<span class="sc">$</span>t <span class="sc">&lt;=</span> t_ob) <span class="sc">&lt;</span> <span class="fu">sum</span>(df<span class="sc">$</span>t <span class="sc">&gt;</span> t_ob)){</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>      tail_line <span class="ot">&lt;-</span> t_right_tail</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>      tail_line <span class="ot">&lt;-</span> t_left_tail</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">=</span> p <span class="sc">+</span> <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> tail_line, <span class="at">xend =</span> tail_line, </span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>                               <span class="at">y =</span> <span class="dv">0</span>, <span class="at">yend =</span> <span class="fu">dnorm</span>(tail_line, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)),</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>                          <span class="at">linewidth =</span> <span class="fl">0.25</span>, <span class="at">show.legend =</span> F) <span class="sc">+</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>      <span class="fu">annotate</span>(<span class="st">"rect"</span>, <span class="at">xmin =</span> (<span class="sc">-</span>t_ob) <span class="sc">-</span> <span class="fl">0.25</span>, <span class="at">xmax =</span> (<span class="sc">-</span>t_ob) <span class="sc">+</span> <span class="fl">0.3</span>,</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>           <span class="at">ymin =</span> <span class="fl">0.022</span> <span class="sc">-</span> <span class="fl">0.015</span>, <span class="at">ymax =</span> <span class="fl">0.022</span> <span class="sc">+</span> <span class="fl">0.015</span>,</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> <span class="st">"#F0FBC5"</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> (<span class="sc">-</span>t_ob), <span class="at">y =</span> <span class="fl">0.022</span>, <span class="at">label =</span>  <span class="fu">expression</span>(<span class="sc">-</span>t[ob])), </span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>                 <span class="at">parse =</span> T, <span class="at">size =</span> <span class="fl">3.3</span>, <span class="at">show.legend =</span> F)</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>  p</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell" data-layout-align="center">
@@ -582,15 +594,15 @@ Note
 <span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(decile <span class="sc">==</span> <span class="fl">0.1</span>){</span>
 <span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>    plot <span class="ot">&lt;-</span> plot <span class="sc">+</span> <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> vlines[<span class="dv">1</span>,<span class="st">"x"</span>], <span class="at">y =</span> <span class="fl">0.015</span>,</span>
 <span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">label =</span>  <span class="fu">expression</span>(t[<span class="st">"10%"</span>])), </span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>                             <span class="at">inherit.aes =</span> F, <span class="at">parse =</span> T, <span class="at">size =</span> <span class="dv">3</span>)</span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>                             <span class="at">inherit.aes =</span> F, <span class="at">parse =</span> T, <span class="at">size =</span> <span class="fl">3.3</span>)</span>
 <span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span>(decile <span class="sc">==</span> <span class="fl">0.2</span>){</span>
 <span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>    plot <span class="ot">&lt;-</span> plot <span class="sc">+</span> <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> vlines[<span class="dv">1</span>,<span class="st">"x"</span>]<span class="sc">-</span><span class="fl">0.07</span>, <span class="at">y =</span> <span class="fl">0.015</span>,</span>
 <span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">label =</span>  <span class="fu">expression</span>(t[<span class="st">"10%"</span>])), </span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>                             <span class="at">inherit.aes =</span> F, <span class="at">parse =</span> T, <span class="at">size =</span> <span class="fl">2.7</span>) <span class="sc">+</span> </span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>                             <span class="at">inherit.aes =</span> F, <span class="at">parse =</span> T, <span class="at">size =</span> <span class="fl">3.4</span>) <span class="sc">+</span> </span>
 <span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> vlines[<span class="dv">2</span>,<span class="st">"x"</span>]<span class="sc">+</span><span class="fl">0.07</span>, <span class="at">y =</span> <span class="fl">0.015</span>,</span>
 <span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">label =</span>  <span class="fu">expression</span>(t[<span class="st">"20%"</span>])), </span>
-<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>                             <span class="at">inherit.aes =</span> F, <span class="at">parse =</span> T, <span class="at">size =</span> <span class="fl">2.7</span>)</span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>                             <span class="at">inherit.aes =</span> F, <span class="at">parse =</span> T, <span class="at">size =</span> <span class="fl">3.4</span>)</span>
 <span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(plot)</span>
@@ -662,8 +674,8 @@ Note
 </div>
 </div>
 </div>
-<p>Note that because these test statistics represent 10% of the data, the probability that a random draw from the null distribution will be any of these values is 10% , i.e.&nbsp;<span class="math inline">\(P(T \leq t_{_{10\%}}) = p_{_{left}}(t_{_{10\%}})  = 0.1\)</span>, and this is true for any other quantile. Therefore, all statistics <span class="math inline">\(t\)</span> in the first decile interval have probabilities smaller or equal to 0.1: <span class="math inline">\(p_{_{left}}(t) = P(T \le t) \le 0.1 \ \ \forall t \le t_{_{10\%}}\)</span>.</p>
-<p>Let’s confirm this by computing the left-tailed <em>p</em>-value for all test statistics in the null distribution and displaying the histogram of <em>p</em>-values for those within the 1st decile interval.</p>
+<p>What is crucial to note is that, because these test statistics represent 10% of the data, the probability that a random draw from the null distribution will fall in this bottom region is 10%, i.e.&nbsp;<span class="math inline">\(P(T \leq t_{_{10\%}}) = p_{_{left}}(t_{_{10\%}})  = 0.1\)</span>, and this is true for any other quantile. Therefore, all statistics <span class="math inline">\(t\)</span> in the first decile interval have probabilities smaller or equal to 0.1: <span class="math inline">\(p_{_{left}}(t) = P(T \le t) \le 0.1 \ \ \forall t \le t_{_{10\%}}\)</span>.</p>
+<p>Below, we can visually confirm this by displaying the histogram of left-tailed <em>p</em>-values for all test statistics within the 1st decile interval.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Left-tailed p-vals</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>left_tailed_pval <span class="ot">&lt;-</span> <span class="fu">sapply</span>(df<span class="sc">$</span>t, <span class="cf">function</span>(t){<span class="fu">table</span>(df<span class="sc">$</span>t <span class="sc">&lt;=</span> t)[<span class="st">"TRUE"</span>]<span class="sc">/</span><span class="dv">10000</span>})</span>
@@ -678,7 +690,7 @@ Note
 </div>
 </div>
 </div>
-<p>Now, for the subsequent 10% of test statistics—those between deciles <span class="math inline">\(t_{_{10\%}}\)</span> and <span class="math inline">\(t_{_{20\%}}\)</span>, their <em>p</em>-values lie in (0.1, 02]: <span class="math inline">\(0.1 &lt; p_{_{left}}(t) = P(T \le t) \le 0.2 \ \ \forall \ \ t_{_{10\%}} &lt; t \le t_{_{20\%}}\)</span>.</p>
+<p>For the subsequent 10% of test statistics—those lying between the 1st and 2nd deciles <span class="math inline">\(t_{_{10\%}}\)</span> and <span class="math inline">\(t_{_{20\%}}\)</span>—their <em>p</em>-values lie in the interval (0.1, 0.2]: <span class="math inline">\(0.1 &lt; p_{_{left}}(t) = P(T \le t) \le 0.2 \ \ \forall \ \ t_{_{10\%}} &lt; t \le t_{_{20\%}}\)</span>.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cowplot)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -694,8 +706,8 @@ Note
 </div>
 </div>
 </div>
-<p>Because every time we take the same percentage of test statistics lying between the <span class="math inline">\(q\)</span>th and <span class="math inline">\((q-1)\)</span>th deciles for <span class="math inline">\(q = \{1,2,3, ..., 10\}\)</span>, and because their <em>p</em>-values are contained between <span class="math inline">\(\frac{q-1}{10}\)</span> and <span class="math inline">\(\frac{q}{10}\)</span>, bars have the same height in the histogram.</p>
-<p>See it now, isn’t? If not, let’s try adding more data—30%, 40%, 50% … up to the whole distribution.</p>
+<p>Because every time we take the same percentage of test statistics lying between the <span class="math inline">\((q-1)\)</span>th and <span class="math inline">\(q\)</span>th deciles for <span class="math inline">\(q = 1,2,3, ..., 10\)</span>, and because their <em>p</em>-values lie in the interval <span class="math inline">\((\frac{q-1}{10}\)</span>, <span class="math inline">\(\frac{q}{10}]\)</span>, each bin in the <em>p</em>-value histogram contains the same proportion of statistics. As a result, the histogram is flat, reflecting the uniform distribution of <em>p</em>-values under the null hypothesis.</p>
+<p>See it now, isn’t? If not, let’s progressively add more data—30%, 40%, 50%, and so on, until we reach the full distribution.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(<span class="fu">plot_density_decile</span>(<span class="fl">0.3</span>), <span class="fu">plot_pval_hist</span>(<span class="fl">0.3</span>, <span class="st">"left"</span>), </span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">plot_density_decile</span>(<span class="fl">0.4</span>), <span class="fu">plot_pval_hist</span>(<span class="fl">0.4</span>, <span class="st">"left"</span>), </span>
@@ -710,42 +722,67 @@ Note
 </div>
 <section id="mathematical-demonstration" class="level3">
 <h3 class="anchored" data-anchor-id="mathematical-demonstration">Mathematical demonstration</h3>
-<p>These observations can be formally demonstrated. The <strong>probability integral transform</strong> theorem states that for <span class="math inline">\(T\)</span>, a continuous random variable, the random variable for its cumulative distribution function <span class="math inline">\(Y = F_T(t) = P(T \le t)\)</span>, (which returns its left-tailed <em>p</em>-values) has a uniform distribution on the interval <span class="math inline">\([0,1]\)</span>.</p>
-<p><u>Proof</u>: consider the cumulative distribution function of <span class="math inline">\(Y\)</span>, <span class="math inline">\(F_Y(y) = P(Y \leq y)\)</span>. The key is to note that the probability of getting <em>p</em>-values below or equal to <span class="math inline">\(y\)</span> is equivalent to the probability of getting <span class="math inline">\(T\)</span> statistics below or equal to corresponding quantile for <span class="math inline">\(y\)</span> (see example in the code below).</p>
-<p>That is, <span class="math inline">\(P(Y \le y) = P(T \le F^{-1}_T(y))\)</span>, which, by definition, is exactly <span class="math inline">\(y\)</span>. Thus, <span class="math inline">\(F_Y(y)=P(Y \le y) = y\)</span> and <span class="math inline">\(Y\)</span> is uniformly distributed.</p>
+<p>This observation can be formally demonstrated. The <em>probability integral transform</em> theorem states that, for <span class="math inline">\(T\)</span>, a continuous random variable, the random variable for its cumulative distribution function <span class="math inline">\(Y = F_T(T)\)</span> (which returns left-tailed <em>p</em>-values), is uniformly distributed on <span class="math inline">\([0,1]\)</span>.</p>
+<p><u>Proof</u>: consider the cumulative distribution function of <span class="math inline">\(Y\)</span>, <span class="math inline">\(F_Y(y) = P(Y \leq y)\)</span>. Because <span class="math inline">\(P(Y \le y) = P(T \le F^{-1}_T(y)) = y\)</span>, then <span class="math inline">\(F_Y(y)=P(Y \le y) = y\)</span> and <span class="math inline">\(Y\)</span> is uniformly distributed.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>💡 The key here is to note that the probability of observing a <em>p</em>-value less than or equal to <span class="math inline">\(y\)</span> is the same as the probability of observing a test statistic less than or equal to the quantile <span class="math inline">\(F^{-1}_T(y)\)</span> in the null distribution, corresponding to <span class="math inline">\(y\)</span>. That is, <span class="math inline">\(P(Y \le y) = P(T \le F^{-1}_T(y))\)</span>, which is, by definition, <span class="math inline">\(y\)</span>. See example in the code below.</p>
+</div>
+</div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Pr(Y ≤ 0.456)</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pr_Y <span class="ot">=</span> <span class="fu">sum</span>(df<span class="sc">$</span>left_tailed_pval <span class="sc">&lt;=</span> <span class="fl">0.456</span>) <span class="sc">/</span> <span class="fu">length</span>(df<span class="sc">$</span>left_tailed_pval) </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Pr(X ≤ quantile for 0.456)</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pr_X <span class="ot">=</span> <span class="fu">sum</span>(df<span class="sc">$</span>x <span class="sc">&lt;=</span> <span class="fu">quantile</span>(df<span class="sc">$</span>x, <span class="fl">0.456</span>)) <span class="sc">/</span> <span class="fu">length</span>(df<span class="sc">$</span>x) </span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>pr_Y <span class="sc">==</span> pr_X</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Pr(T ≤ quantile for 0.456)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pr_T <span class="ot">=</span> <span class="fu">sum</span>(df<span class="sc">$</span>t <span class="sc">&lt;=</span> <span class="fu">quantile</span>(df<span class="sc">$</span>t, <span class="fl">0.456</span>)) <span class="sc">/</span> <span class="fu">length</span>(df<span class="sc">$</span>t) </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>pr_Y <span class="sc">==</span> pr_T</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] NA</code></pre>
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
 </section>
 </section>
 <section id="right-tailed-p-values" class="level2">
 <h2 class="anchored" data-anchor-id="right-tailed-p-values">Right-tailed <em>p</em>-values</h2>
-<p>For right-tailed <em>p</em>-values the pattern is mirrored: the bottom 10% of test statistics have <em>p</em>-values between 0.9 to 1 so their <em>p</em>-values</p>
-<p>The second top 10% between 0.8 and 0.9, and so on … Their</p>
+<p>For right-tailed <em>p</em>-values the pattern is mirrored: for every <span class="math inline">\(t \le t_{_{10\%}}\)</span>, because <span class="math inline">\(P(T \le t) \le 0.1\)</span>, then <span class="math inline">\(p_{_{right}}(t)=P(T&gt;t) =1 - P(T \leq t) \ge 0.9\)</span>. For the second 10% of test statistics <span class="math inline">\(t_{_{10\%}} &lt; t \leq t_{_{20\%}}\)</span>, <span class="math inline">\(0.1&lt;P(T≤t)≤0.2\)</span> ⟹ <span class="math inline">\(0.8 \leq p_{_{right}}(t)=P(T&gt;t) =1 - P(T \leq t) &lt; 0.9\)</span>. In general, test statistics between the <span class="math inline">\((q-1)\)</span>th and <span class="math inline">\(q\)</span>th deciles have <em>p</em>-values in <span class="math inline">\([1-\frac{q}{10}\)</span>, <span class="math inline">\(1-\frac{q-1}{10})\)</span>.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Right-tailed p-vals</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># df$right_tailed_pval &lt;- sapply(df$t, function(t){table(df$t &gt; t)["TRUE"]/10000})</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># df$right_tailed_pval &lt;- replace(df$right_tailed_pval, which(is.na(df$right_tailed_pval)), 0)</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_pval_hist(0.1, "right")</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>right_tailed_pval <span class="ot">&lt;-</span> <span class="fu">sapply</span>(df<span class="sc">$</span>t, <span class="cf">function</span>(t){<span class="fu">table</span>(df<span class="sc">$</span>t <span class="sc">&gt;</span> t)[<span class="st">"TRUE"</span>]<span class="sc">/</span><span class="dv">10000</span>})</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>right_tailed_pval <span class="ot">&lt;-</span> <span class="fu">replace</span>(df<span class="sc">$</span>right_tailed_pval, <span class="fu">which</span>(<span class="fu">is.na</span>(df<span class="sc">$</span>right_tailed_pval)), <span class="dv">0</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(<span class="fu">plot_density_decile</span>(<span class="fl">0.1</span>), <span class="fu">plot_pval_hist</span>(<span class="fl">0.1</span>, <span class="st">"right"</span>), </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>          <span class="fu">plot_density_decile</span>(<span class="dv">1</span>), <span class="fu">plot_pval_hist</span>(<span class="dv">1</span>, <span class="st">"right"</span>), </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">align =</span> <span class="st">"vh"</span>, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">rel_widths =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/hists_right_all-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
 </div>
 <section id="mathematical-demonstration-1" class="level3">
 <h3 class="anchored" data-anchor-id="mathematical-demonstration-1">Mathematical demonstration</h3>
-<p><u>Proof</u>: we define <span class="math inline">\(Y_c = P(T &gt; t) = 1 - Y\)</span>, with <span class="math inline">\(Y = P(T \le t)\)</span>. The CDF of <span class="math inline">\(Y_c\)</span> is given by <span class="math inline">\(P(Y_c\le y) = 1 - P(Y_c &gt; y)\)</span>. The key here is to note that the those right-handed <em>p</em>-values greater than <span class="math inline">\(y\)</span> correspond to the bottom <span class="math inline">\(1-y\)</span> proportion of the data so that <span class="math inline">\(P(Y_c &gt; y) = P(X \leq F^{-1}_X(1-y))\)</span>, which by definition, equals <span class="math inline">\(1-y\)</span> (see example below). Therefore <span class="math inline">\(P(Y_c &gt;y) = 1-y\)</span> and <span class="math inline">\(P(Y_c\leq y) = 1 - (1 - y) = y\)</span>, and both, <span class="math inline">\(Y\)</span> and its complement <span class="math inline">\(Y_c\)</span>, follow an uniform distribution.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Pr(X ≤ quantile for 1 - 0.7)</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># p1 &lt;- plot_density_decile(0.3)</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ## Pr(Yc &gt; 0.7)</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># p2 &lt;- plot_pval_hist(0.3, "right")</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_grid(p2, p1, align = "h")</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><u>Proof</u>: let <span class="math inline">\(Y_c = 1-Y\)</span> denote the random variable for right-tailed <em>p</em>-values, which is the complement of the random variable for the CDF of <span class="math inline">\(T\)</span>. Consider the CDF of <span class="math inline">\(Y_c\)</span>, <span class="math inline">\(P(Y_c\leq y) = 1 - P(Y_c &gt; y)\)</span>. Because <span class="math inline">\(P(Y_c &gt; y) = P(T \leq F^{-1}_T(1-y)) = 1-y\)</span>, then <span class="math inline">\(P(Y_c\leq y) = 1 -(1-y)=y\)</span> and both, <span class="math inline">\(Y\)</span> and its complement <span class="math inline">\(Y_c\)</span>, follow a uniform distribution.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>💡 The key point here is that right-tailed <em>p</em>-values greater than <span class="math inline">\(y\)</span> correspond to the bottom <span class="math inline">\(1-y\)</span> proportion of test statistics in the null distribution, so that <span class="math inline">\(P(Y_c &gt; y) = P(T \leq F^{-1}_T(1-y))\)</span>, which, by definition, equals <span class="math inline">\(1-y\)</span>.</p>
+</div>
 </div>
 </section>
 </section>
@@ -753,16 +790,16 @@ Note
 <h2 class="anchored" data-anchor-id="two-tailed-p-values">Two-tailed <em>p</em>-values</h2>
 <p>For data points within intervals of deciles <span class="math inline">\(q ∈ \{1,2,3,4,5\}\)</span>, their two-tailed <em>p</em>-values lie between <span class="math inline">\(\frac{q-1}{10}\times 2\)</span> and <span class="math inline">\(\frac{q}{10}\times 2\)</span>, whereas for those above the 5th decile, <em>p</em>-values lie between <span class="math inline">\((1-\frac{q-1}{10})\times 2\)</span> and <span class="math inline">\((1-\frac{q}{10})\times 2\)</span>.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Right-tailed p-vals</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># df$two_tailed_pval &lt;- apply(df, 1, function(x){2*as.double(min(x["left_tailed_pval"], x["right_tailed_pval"]))})</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ## Hist of pvals for bottom 10% data points</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># p1 &lt;- plot_pval_hist(0.1, "both") +  guides(fill = guide_legend(reverse = TRUE))</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># p2 &lt;- plot_pval_hist(0.2, "both") +  guides(fill = guide_legend(reverse = TRUE))</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># p3 &lt;- plot_pval_hist(0.6, "both") +  guides(fill = guide_legend(reverse = TRUE))</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># p4 &lt;- plot_pval_hist(1, "both") +  guides(fill = guide_legend(reverse = TRUE))</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_grid(p1, p2, p3, p4, align = "h", ncol = 1)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Right-tailed p-vals</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># df$two_tailed_pval &lt;- apply(df, 1, function(x){2*as.double(min(x["left_tailed_pval"], x["right_tailed_pval"]))})</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ## Hist of pvals for bottom 10% data points</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># p1 &lt;- plot_pval_hist(0.1, "both") +  guides(fill = guide_legend(reverse = TRUE))</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># p2 &lt;- plot_pval_hist(0.2, "both") +  guides(fill = guide_legend(reverse = TRUE))</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># p3 &lt;- plot_pval_hist(0.6, "both") +  guides(fill = guide_legend(reverse = TRUE))</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co"># p4 &lt;- plot_pval_hist(1, "both") +  guides(fill = guide_legend(reverse = TRUE))</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_grid(p1, p2, p3, p4, align = "h", ncol = 1)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="mathematical-demonstration-2" class="level3">
 <h3 class="anchored" data-anchor-id="mathematical-demonstration-2">Mathematical demonstration</h3>

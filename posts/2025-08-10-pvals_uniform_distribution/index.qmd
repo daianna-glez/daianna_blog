@@ -7,6 +7,8 @@ author:
 date: 2025-02-07
 categories:
   - "p-value"
+  - "test statistic"
+  - "cumulative distribution function"
   - "uniform distribution"
   - "probability integral transform"
 image: "images/"
@@ -37,9 +39,9 @@ In the practice, this statement is easy to graphically verify—simply plot the 
 
 Let us begin by defining a test statistic. When you conduct a hypothesis test on a sample or dataset, you compute a quantity that measures the *effect* you are interested in (e.g. the difference in sample means across conditions). This effect estimate is often accompanied by a measure of *uncertainty* that depends on sample size and variability. In many statistical tests, the effect and its uncertainty are combined into what is known as a [**test statistic**]{style="color:#EE7942"}, but its specific construction depends on the properties of the data and the research question.
 
-What is key about test statistics is that we know (or can approximate) their sampling distribution under the [null hypothesis]{style="background-color:#E6F6FB"} (e.g. when the effect is nonexistent). This allow us to compare our observed test statistic $t_{ob}$ against the null distribution and assess how likely such a value would be if the null hypothesis were true. If you followed this reasoning, you’ve essentially grasped what a *p*-value is.
+What is key about test statistics is that we know (or can approximate) their sampling distribution under the *null hypothesis* (e.g. when the effect is nonexistent). This allow us to compare our observed test statistic $t_{ob}$ against the null distribution and assess how likely such a value would be if the null hypothesis were true. If you followed this reasoning, you’ve essentially grasped what a *p*-value is.
 
-The [***p*****-value**]{style="color:#EE0000"} is the probability that, if you were to draw at random from such null distribution of test statistics, you would get one that is equal or more extreme (smaller or greater) than your observed test statistic $t_{ob}$.
+The [***p*****-value**]{style="color:#EE0000"} is the probability that, if you were to draw at random from such null distribution of test statistics, you would get one that is equal or more extreme (smaller or greater) than your observed test statistic [$t_{ob}$]{style="background-color:#F0FBC5"}.
 
 To visualize what a *p*-value represents, let's simulate a null distribution of test statistics by randomly sampling 10,000 times from a standard normal distribution. Let $T$ denote the test statistic, a random variable induced by the data, whose distribution under the null hypothesis we are simulating.
 
@@ -131,6 +133,11 @@ plot_density_and_pval <- function(t_ob, tail){
   labs(x = "T", y = "Density",
        fill = fill_lab) +
   coord_cartesian(ylim = c(0, max(df$y)), expand = F) +
+  annotate("rect", xmin = t_ob - 0.25, xmax = t_ob + 0.25,
+           ymin = 0.022 - 0.015, ymax = 0.022 + 0.015,
+           fill = "#F0FBC5", alpha = 0.85) +
+  geom_text(aes(x = t_ob, y = 0.022, label =  expression(t[ob])), 
+                 parse = T, size = 3.3, show.legend = F) +
   theme(axis.text = element_text(size = 9),
         axis.title.x = element_text(size = 10),
         axis.title.y = element_text(size = 10),
@@ -147,7 +154,12 @@ plot_density_and_pval <- function(t_ob, tail){
     }
     p = p + geom_segment(aes(x = tail_line, xend = tail_line, 
                                y = 0, yend = dnorm(tail_line, mean = 0, sd = 1)),
-                          linewidth = 0.25, show.legend = F) 
+                          linewidth = 0.25, show.legend = F) +
+      annotate("rect", xmin = (-t_ob) - 0.25, xmax = (-t_ob) + 0.3,
+           ymin = 0.022 - 0.015, ymax = 0.022 + 0.015,
+           fill = "#F0FBC5", alpha = 0.85) +
+      geom_text(aes(x = (-t_ob), y = 0.022, label =  expression(-t[ob])), 
+                 parse = T, size = 3.3, show.legend = F)
 
   }
   p
@@ -298,15 +310,15 @@ plot_density_decile <- function(decile){
   if(decile == 0.1){
     plot <- plot + geom_text(aes(x = vlines[1,"x"], y = 0.015,
                                  label =  expression(t["10%"])), 
-                             inherit.aes = F, parse = T, size = 3)
+                             inherit.aes = F, parse = T, size = 3.3)
   }
   else if(decile == 0.2){
     plot <- plot + geom_text(aes(x = vlines[1,"x"]-0.07, y = 0.015,
                                  label =  expression(t["10%"])), 
-                             inherit.aes = F, parse = T, size = 2.7) + 
+                             inherit.aes = F, parse = T, size = 3.4) + 
                    geom_text(aes(x = vlines[2,"x"]+0.07, y = 0.015,
                                  label =  expression(t["20%"])), 
-                             inherit.aes = F, parse = T, size = 2.7)
+                             inherit.aes = F, parse = T, size = 3.4)
   }
   
   return(plot)
@@ -373,9 +385,9 @@ Let's look at the bottom 10% of test statistics under the null distribution.
 plot_density_decile(0.1)
 ```
 
-Note that because these test statistics represent 10% of the data, the probability that a random draw from the null distribution will be any of these values is 10% , i.e. $P(T \leq t_{_{10\%}}) = p_{_{left}}(t_{_{10\%}})  = 0.1$, and this is true for any other quantile. Therefore, all statistics $t$ in the first decile interval have probabilities smaller or equal to 0.1: $p_{_{left}}(t) = P(T \le t) \le 0.1 \ \ \forall t \le t_{_{10\%}}$.
+What is crucial to note is that, because these test statistics represent 10% of the data, the probability that a random draw from the null distribution will fall in this bottom region is 10%, i.e. $P(T \leq t_{_{10\%}}) = p_{_{left}}(t_{_{10\%}})  = 0.1$, and this is true for any other quantile. Therefore, all statistics $t$ in the first decile interval have probabilities smaller or equal to 0.1: $p_{_{left}}(t) = P(T \le t) \le 0.1 \ \ \forall t \le t_{_{10\%}}$.
 
-Let's confirm this by computing the left-tailed *p*-value for all test statistics in the null distribution and displaying the histogram of *p*-values for those within the 1st decile interval.
+Below, we can visually confirm this by displaying the histogram of left-tailed *p*-values for all test statistics within the 1st decile interval.
 
 ```{r hists_01, fig.width = 5, fig.height = 4, fig.align='center', warning=FALSE, message=FALSE}
 
@@ -386,7 +398,7 @@ df$left_tailed_pval <- sapply(df$t, function(t){table(df$t <= t)["TRUE"]/10000})
 plot_pval_hist(0.1, "left")
 ```
 
-Now, for the subsequent 10% of test statistics—those between deciles $t_{_{10\%}}$ and $t_{_{20\%}}$, their *p*-values lie in (0.1, 02\]: $0.1 < p_{_{left}}(t) = P(T \le t) \le 0.2 \ \ \forall \ \ t_{_{10\%}} < t \le t_{_{20\%}}$.
+For the subsequent 10% of test statistics—those lying between the 1st and 2nd deciles $t_{_{10\%}}$ and $t_{_{20\%}}$—their *p*-values lie in the interval (0.1, 0.2\]: $0.1 < p_{_{left}}(t) = P(T \le t) \le 0.2 \ \ \forall \ \ t_{_{10\%}} < t \le t_{_{20\%}}$.
 
 ```{r plots_02, fig.width = 10.2, fig.height = 3.7, fig.align='center', warning=FALSE, message=FALSE}
 library(cowplot)
@@ -397,9 +409,9 @@ p2 <- plot_pval_hist(0.2, "left")
 plot_grid(p1, p2, align = "h")
 ```
 
-Because every time we take the same percentage of test statistics lying between the $q$th and $(q-1)$th deciles for $q = \{1,2,3, ..., 10\}$, and because their *p*-values are contained between $\frac{q-1}{10}$ and $\frac{q}{10}$, bars have the same height in the histogram.
+Because every time we take the same percentage of test statistics lying between the $(q-1)$th and $q$th deciles for $q = 1,2,3, ..., 10$, and because their *p*-values lie in the interval $(\frac{q-1}{10}$, $\frac{q}{10}]$, each bin in the *p*-value histogram contains the same proportion of statistics. As a result, the histogram is flat, reflecting the uniform distribution of *p*-values under the null hypothesis.
 
-See it now, isn't? If not, let’s try adding more data—30%, 40%, 50% … up to the whole distribution.
+See it now, isn't? If not, let’s progressively add more data—30%, 40%, 50%, and so on, until we reach the full distribution.
 
 ```{r plots_03_to_10, fig.width = 12, fig.height = 11, fig.align='center', warning=FALSE, message=FALSE}
 
@@ -410,67 +422,65 @@ plot_grid(plot_density_decile(0.3), plot_pval_hist(0.3, "left"),
 
 ### Mathematical demonstration
 
-These observations can be formally demonstrated. The **probability integral transform** theorem states that for $T$, a continuous random variable, the random variable for its cumulative distribution function $Y = F_T(t) = P(T \le t)$, (which returns its left-tailed *p*-values) has a uniform distribution on the interval $[0,1]$.
+This observation can be formally demonstrated. The *probability integral transform* theorem states that, for $T$, a continuous random variable, the random variable for its cumulative distribution function $Y = F_T(T)$ (which returns left-tailed *p*-values), is uniformly distributed on $[0,1]$.
 
-[Proof]{.underline}: consider the cumulative distribution function of $Y$, $F_Y(y) = P(Y \leq y)$. The key is to note that the probability of getting *p*-values below or equal to $y$ is equivalent to the probability of getting $T$ statistics below or equal to corresponding quantile for $y$ (see example in the code below).
+[Proof]{.underline}: consider the cumulative distribution function of $Y$, $F_Y(y) = P(Y \leq y)$. Because $P(Y \le y) = P(T \le F^{-1}_T(y)) = y$, then $F_Y(y)=P(Y \le y) = y$ and $Y$ is uniformly distributed.
 
-That is, $P(Y \le y) = P(T \le F^{-1}_T(y))$, which, by definition, is exactly $y$. Thus, $F_Y(y)=P(Y \le y) = y$ and $Y$ is uniformly distributed.
+::: {.callout-tip icon="false"}
+💡 The key here is to note that the probability of observing a *p*-value less than or equal to $y$ is the same as the probability of observing a test statistic less than or equal to the quantile $F^{-1}_T(y)$ in the null distribution, corresponding to $y$. That is, $P(Y \le y) = P(T \le F^{-1}_T(y))$, which is, by definition, $y$. See example in the code below.
+:::
 
 ```{r demo_left}
 
 ## Pr(Y ≤ 0.456)
 pr_Y = sum(df$left_tailed_pval <= 0.456) / length(df$left_tailed_pval) 
-## Pr(X ≤ quantile for 0.456)
-pr_X = sum(df$x <= quantile(df$x, 0.456)) / length(df$x) 
-pr_Y == pr_X
+## Pr(T ≤ quantile for 0.456)
+pr_T = sum(df$t <= quantile(df$t, 0.456)) / length(df$t) 
+pr_Y == pr_T
 ```
 
 ## Right-tailed *p*-values
 
-For right-tailed *p*-values the pattern is mirrored: the bottom 10% of test statistics have *p*-values between 0.9 to 1 so their *p*-values
+For right-tailed *p*-values the pattern is mirrored: for every $t \le t_{_{10\%}}$, because $P(T \le t) \le 0.1$, then $p_{_{right}}(t)=P(T>t) =1 - P(T \leq t) \ge 0.9$. For the second 10% of test statistics $t_{_{10\%}} < t \leq t_{_{20\%}}$, $0.1<P(T≤t)≤0.2$ ⟹ $0.8 \leq p_{_{right}}(t)=P(T>t) =1 - P(T \leq t) < 0.9$. In general, test statistics between the $(q-1)$th and $q$th deciles have *p*-values in $[1-\frac{q}{10}$, $1-\frac{q-1}{10})$.
 
-The second top 10% between 0.8 and 0.9, and so on ... Their
-
-```{r hists_right_all, fig.width = 5, fig.height = 4, fig.align='center', warning=FALSE, message=FALSE}
+```{r hists_right_all, fig.width = 12, fig.height = 7, fig.align='center', warning=FALSE, message=FALSE}
 
 ## Right-tailed p-vals
-# df$right_tailed_pval <- sapply(df$t, function(t){table(df$t > t)["TRUE"]/10000})
-# df$right_tailed_pval <- replace(df$right_tailed_pval, which(is.na(df$right_tailed_pval)), 0)
-# 
-# plot_pval_hist(0.1, "right")
+df$right_tailed_pval <- sapply(df$t, function(t){table(df$t > t)["TRUE"]/10000})
+df$right_tailed_pval <- replace(df$right_tailed_pval, which(is.na(df$right_tailed_pval)), 0)
+
+plot_grid(plot_density_decile(0.1), plot_pval_hist(0.1, "right"), 
+          plot_density_decile(1), plot_pval_hist(1, "right"), 
+          align = "vh", ncol = 2, rel_widths = c(1, 0.8))
 
 ```
 
 ### Mathematical demonstration
 
-[Proof]{.underline}: we define $Y_c = P(T > t) = 1 - Y$, with $Y = P(T \le t)$. The CDF of $Y_c$ is given by $P(Y_c\le y) = 1 - P(Y_c > y)$. The key here is to note that the those right-handed *p*-values greater than $y$ correspond to the bottom $1-y$ proportion of the data so that $P(Y_c > y) = P(X \leq F^{-1}_X(1-y))$, which by definition, equals $1-y$ (see example below). Therefore $P(Y_c >y) = 1-y$ and $P(Y_c\leq y) = 1 - (1 - y) = y$, and both, $Y$ and its complement $Y_c$, follow an uniform distribution.
+[Proof]{.underline}: let $Y_c = 1-Y$ denote the random variable for right-tailed *p*-values, which is the complement of the random variable for the CDF of $T$. Consider the CDF of $Y_c$, $P(Y_c\leq y) = 1 - P(Y_c > y)$. Because $P(Y_c > y) = P(T \leq F^{-1}_T(1-y)) = 1-y$, then $P(Y_c\leq y) = 1 -(1-y)=y$ and both, $Y$ and its complement $Y_c$, follow a uniform distribution.
 
-```{r demo_right, fig.width = 10.2, fig.height = 3.7, fig.align='center', warning=FALSE, message=FALSE}
-
-## Pr(X ≤ quantile for 1 - 0.7)
-# p1 <- plot_density_decile(0.3)
-# ## Pr(Yc > 0.7)
-# p2 <- plot_pval_hist(0.3, "right")
-# 
-# plot_grid(p2, p1, align = "h")
-```
+::: {.callout-tip icon="false"}
+💡 The key point here is that right-tailed *p*-values greater than $y$ correspond to the bottom $1-y$ proportion of test statistics in the null distribution, so that $P(Y_c > y) = P(T \leq F^{-1}_T(1-y))$, which, by definition, equals $1-y$.
+:::
 
 ## Two-tailed *p*-values
+
+Remember we define a two-tailed *p*-value by $p_{_{two}}(t_{ob}) =2 \times min\{P(T \leq t_{ob}),\ \ P(T >t_{ob})\}$. Therefore, for test statistics within the first five decile intervals ($q = 1,2,3,4,5$),
 
 For data points within intervals of deciles $q ∈ \{1,2,3,4,5\}$, their two-tailed *p*-values lie between $\frac{q-1}{10}\times 2$ and $\frac{q}{10}\times 2$, whereas for those above the 5th decile, *p*-values lie between $(1-\frac{q-1}{10})\times 2$ and $(1-\frac{q}{10})\times 2$.
 
 ```{r hists_two_all, fig.width = 5, fig.height = 13, fig.align='center', warning=FALSE, message=FALSE}
 
-## Right-tailed p-vals
-# df$two_tailed_pval <- apply(df, 1, function(x){2*as.double(min(x["left_tailed_pval"], x["right_tailed_pval"]))})
-# 
-# ## Hist of pvals for bottom 10% data points
-# p1 <- plot_pval_hist(0.1, "both") +  guides(fill = guide_legend(reverse = TRUE))
-# p2 <- plot_pval_hist(0.2, "both") +  guides(fill = guide_legend(reverse = TRUE))
-# p3 <- plot_pval_hist(0.6, "both") +  guides(fill = guide_legend(reverse = TRUE))
-# p4 <- plot_pval_hist(1, "both") +  guides(fill = guide_legend(reverse = TRUE))
-# 
-# plot_grid(p1, p2, p3, p4, align = "h", ncol = 1)
+## Two-tailed p-vals
+df$two_tailed_pval <- apply(df, 1, function(x){2*as.double(min(x["left_tailed_pval"], x["right_tailed_pval"]))})
+
+## Hist of pvals for bottom 10% data points
+p1 <- plot_pval_hist(0.1, "both") +  guides(fill = guide_legend(reverse = TRUE))
+p2 <- plot_pval_hist(0.2, "both") +  guides(fill = guide_legend(reverse = TRUE))
+p3 <- plot_pval_hist(0.6, "both") +  guides(fill = guide_legend(reverse = TRUE))
+p4 <- plot_pval_hist(1, "both") +  guides(fill = guide_legend(reverse = TRUE))
+
+plot_grid(p1, p2, p3, p4, align = "h", ncol = 1)
 
 ```
 

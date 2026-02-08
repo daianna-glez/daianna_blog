@@ -5,7 +5,7 @@ about:
   links: 
     - icon: github
       text: Github
-      href: https://daianna21.github.io
+      href: https://daianna-glez.github.io
     - icon: linkedin
       text: LinkedIn
       href: http://www.linkedin.com/in/daianna-glez
@@ -19,20 +19,26 @@ about:
 
 ![](images/Headshot_photo_DGP-modified.png){fig-align="center" width="307"}
 
-## **A little about me**
+## **About me**
 
 ::: {style="text-align: justify"}
-Hey! Daianna here. I graduated from the undergraduate program of Genomic Sciences 🧬 at the National Autonomous University of Mexico 🇲🇽 [LCG-UNAM](https://www.lcg.unam.mx/#general) in Cuernavaca, Morelos, Mexico in 2024. Currently I work at the [Sanger Institute](https://www.sanger.ac.uk/group/trynka-group/) in Cambridge, U.K. analyzing single-cell data from iPSC-derived microglia to unveil the genetic architecture of neurodegenerative diseases.
+Hey! Daianna here. I completed my Bachelor’s degree in Genomic Sciences at the National Autonomous University of Mexico ([LCG-UNAM](https://www.lcg.unam.mx/#general)) in 2024. I am currently a researcher in the group of [Dr. Stephen Burgess](https://www.mendelianrandomization.com/index.php/research-group) at the [MRC Biostatistics Unit](https://www.mrc-bsu.cam.ac.uk), University of Cambridge. My research applies causal inference methods to identify disease risk factors and potential drug targets that are relevant to specific population subgroups, with the goal of advancing prevention in at-risk groups and leading to the development of more effective, targeted treatments.
 
-During the last few years I've been involved in multiple omics projects. At the [Lieber Institute for Brain Development (LIBD)](https://www.libd.org) I analyzed transcriptomic data to explore brain develpment and function 🧠, and at the [Karolinska Institutet (KI)](https://ki.se/en) I've studied genetic variability in genes influencing drug response and toxicity 💊. Along the way, with my undergrad courses and projects, analyzing and dealing with my own data, and attending courses, conferences, and meetings, I’ve learned about statistical analyses and bioinformatic tools and I wanted to share all this knowledge with the scientific community 👥, particularly with other students like me that may not have the same opportunities or academic background but also want to analyze datasets to answer biologically-relevant questions. 
+Along my academic journey, I’ve acquired solid foundations in statistics and bioinformatics that have allowed me to explore a broad range of scientific questions. My experiences as a researcher, student, and instructor, have shaped
+
+However, my scientific aspirations go beyond the implementation of
+
+A goal of mine is to contribute to conducting rigurous research by disseminating knowledge and training students and life scientists in data science.
+
+want to exploit to teach others in a more impactfult way. I want to share with the scientific community. particularly with other students like me that may not have the same opportunities or academic background but also want to analyze datasets to answer biologically-relevant questions. 
 :::
 
-## **Motivation for this website**
+## **Motivation for this blog**
 
 ![](images/logo.png){fig-align="center" width="190"}
 
 ::: {style="text-align: justify"}
-Doing scientific research, collaborating with my classmates and peers, and assisting in bioinformatics courses I’ve noticed the existence of two common problems while analyzing data:
+Through conducting scientific research, collaborating with peers, and assisting in bioinformatics courses, I have observed two common problems when analyzing data:
 
 1.  In these interconnected times, with praiseworthy collaborative efforts such as the [Bioconductor](https://www.bioconductor.org) project we can easily develop, share, and use other people’s code, data, methods, and even complete packages for our own analyses. That represents an incredible opportunity for all of us to leverage, contribute, and improve popular and new-emerging computational tools for the reproducible analysis of biological data, no doubts! However, for students and novice researchers, and people coming from areas other than biostatistics, computational biology, or bioinformatics, some analyses may represent obscure-if not completely unknown–territories. People developing these algorithms often assume they have a specialized audience and tend to trivialize underlying statistical concepts and methods when describing their computational functions and packages, not to mention the poor or even missing documentation and support some of the authors offer (with notable exceptions such as *limma* and *variancePartition*, among others). 
 
@@ -74,7 +80,7 @@ Finally, I want to share some very important lessons I have learned so far:
 ## **Feedback**
 
 ::: {style="text-align: justify"}
-💬 I hope you find these materials useful. Feel free to contact me for personal doubts, inquiries, or further discussion in the comment boxes and in any of my media shown below 👇🏼. I’d also appreciate your feedback and contributions to keep improving these contents. Good luck with your analyses!
+💬 I hope you find these materials useful. Feel free to contact me for personal doubts, inquiries, or further discussion in the comment boxes and in any of my media shown below 👇🏼. I’d also appreciate your feedback and contributions to keep improving these contents. Have fun with your analyses!
 :::
 
 \
